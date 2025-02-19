@@ -10,3 +10,7 @@ windows = { version = "0.44", features = [
     "Win32_UI_Input_KeyboardAndMouse"
 ]}
 systray = "0.4"
+
+[build-dependencies]
+embed-resource = "2.1"
+windows = "0.44"
