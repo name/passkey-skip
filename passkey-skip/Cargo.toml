@@ -10,6 +10,7 @@ windows = { version = "0.44", features = [
     "Win32_UI_Input_KeyboardAndMouse"
 ]}
 systray = "0.4"
+clap = { version = "4.4", features = ["derive"] }
 
 [build-dependencies]
 embed-resource = "2.1"

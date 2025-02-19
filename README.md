@@ -9,6 +9,17 @@ A simple Windows utility that automatically handles Windows Security prompts by 
 - Automatically selects the security key option
 - Starts automatically with Windows (optional)
 - Minimal resource usage
+- Optional PIN skip mode for different authentication flows
+
+### Standard Mode
+
+![Standard Mode Demo](https://i.imgur.com/wY5a9xi.gif)
+*Standard mode automatically selects the security key option*
+
+### PIN Skip Mode
+
+![PIN Skip Mode Demo](https://i.imgur.com/5E5tI3z.gif)
+*PIN skip mode bypasses the PIN entry step*
 
 ## Installation
 
@@ -27,46 +38,32 @@ Set-Location -Path "C:\Program Files\PasskeySkip"
 Invoke-WebRequest -Uri "https://github.com/name/passkey-skip/releases/download/0.1.0/passkey-skip.exe" -OutFile "passkey-skip.exe"
 ```
 
-### Command Prompt Installation
+### Auto-start Setup
 
-```bash
-mkdir "C:\Program Files\PasskeySkip"
-cd /d "C:\Program Files\PasskeySkip"
-curl -L -o passkey-skip.exe "https://github.com/name/passkey-skip/releases/download/0.1.0/passkey-skip.exe/passkey-skip.exe"
-```
-
-## Setting Up Auto-Start
-
-### Manual Setup
-
-1. Press `Win + R` to open Run
-2. Type `shell:startup` and press Enter
-3. Create a shortcut to `passkey-skip.exe` in this folder:
-   - Right-click in the Startup folder
-   - Select "New" → "Shortcut"
-   - Browse to `C:\Program Files\PasskeySkip\passkey-skip.exe`
-   - Click "Next" and "Finish"
-
-### PowerShell Setup
+#### Standard Mode
 
 ```powershell
+# Create auto-start entry
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\PasskeySkip.lnk")
 $Shortcut.TargetPath = "C:\Program Files\PasskeySkip\passkey-skip.exe"
 $Shortcut.Save()
 ```
 
-### Command Prompt Setup
+#### PIN Skip Mode
 
-```bash
-powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\PasskeySkip.lnk'); $Shortcut.TargetPath = 'C:\Program Files\PasskeySkip\passkey-skip.exe'; $Shortcut.Save()"
+```powershell
+# Create auto-start entry with PIN skip option
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\PasskeySkip.lnk")
+$Shortcut.TargetPath = "C:\Program Files\PasskeySkip\passkey-skip.exe"
+$Shortcut.Arguments = "--skip-pin"
+$Shortcut.Save()
 ```
 
-## Usage
+### Command Line Options
 
-- The app runs in the system tray (look for the icon near the clock)
-- Right-click the tray icon to see options:
-  - Quit: Closes the application
+- `--skip-pin`: Run in PIN skip mode, which uses a different key sequence for security key selection. Use this if you want to bypass PIN entry in the authentication flow.
 
 ## How It Works
 
@@ -74,7 +71,8 @@ When a Windows Security prompt appears:
 
 1. The app detects the window
 2. Automatically selects the security key option
-3. Confirms the selection
+3. In PIN skip mode, performs additional key presses to bypass PIN entry
+4. Confirms the selection
 
 This eliminates the need to manually select the security key option each time.
 
@@ -89,6 +87,12 @@ This eliminates the need to manually select the security key option each time.
 2. Clone this repository
 3. Run `cargo build --release`
 4. The executable will be in `target/release/passkey-skip.exe`
+
+To run in PIN skip mode after building:
+
+```bash
+./passkey-skip.exe --skip-pin
+```
 
 ## License
 
