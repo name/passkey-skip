@@ -80,23 +80,22 @@ fn is_passkey_window(hwnd: HWND) -> bool {
 fn select_security_key_option(hwnd: HWND) {
     unsafe {
         SetForegroundWindow(hwnd);
-        thread::sleep(Duration::from_millis(50));
-
+        thread::sleep(Duration::from_millis(25));
+        
         keybd_event(VK_TAB.0 as u8, 0, KEYBD_EVENT_FLAGS(0), 0);
         keybd_event(VK_TAB.0 as u8, 0, KEYBD_EVENT_FLAGS(KEYEVENTF_KEYUP.0), 0);
-        thread::sleep(Duration::from_millis(50));
+        thread::sleep(Duration::from_millis(25));
 
         keybd_event(VK_RETURN.0 as u8, 0, KEYBD_EVENT_FLAGS(0), 0);
         keybd_event(VK_RETURN.0 as u8, 0, KEYBD_EVENT_FLAGS(KEYEVENTF_KEYUP.0), 0);
-        thread::sleep(Duration::from_millis(50));
+        thread::sleep(Duration::from_millis(25));
 
         keybd_event(VK_TAB.0 as u8, 0, KEYBD_EVENT_FLAGS(0), 0);
         keybd_event(VK_TAB.0 as u8, 0, KEYBD_EVENT_FLAGS(KEYEVENTF_KEYUP.0), 0);
-        thread::sleep(Duration::from_millis(50));
+        thread::sleep(Duration::from_millis(25));
 
         keybd_event(VK_RETURN.0 as u8, 0, KEYBD_EVENT_FLAGS(0), 0);
         keybd_event(VK_RETURN.0 as u8, 0, KEYBD_EVENT_FLAGS(KEYEVENTF_KEYUP.0), 0);
-        thread::sleep(Duration::from_millis(50));
 
         println!("Security key selected and confirmed");
     }
