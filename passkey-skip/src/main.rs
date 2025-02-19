@@ -1,4 +1,7 @@
-use windows::Win32::UI::WindowsAndMessaging::{FindWindowA, SetForegroundWindow, GetWindowTextW};
+use windows::Win32::UI::WindowsAndMessaging::{
+    FindWindowA, SetForegroundWindow, GetWindowTextW,
+    ShowWindow, SW_HIDE
+};
 use windows::Win32::UI::Input::KeyboardAndMouse::{
     keybd_event, KEYEVENTF_KEYUP, KEYBD_EVENT_FLAGS, VK_RETURN, VK_TAB
 };
@@ -15,7 +18,8 @@ fn main() {
     // Create tray icon
     let mut app = Application::new().expect("Failed to create tray icon");
     app.set_tooltip("Passkey Skip").expect("Failed to set tooltip");
-    app.set_icon_from_file("icon.ico").expect("Failed to set icon");
+    app.set_icon_from_resource("app_icon").expect("Failed to set icon from resource");
+    
     app.add_menu_item("Quit", |_| -> Result<(), std::io::Error> {
         std::process::exit(0);
     }).expect("Failed to add menu item");
@@ -25,32 +29,35 @@ fn main() {
     let mut last_processed_hwnd = HWND(0);
     let mut waiting_for_new_window = false;
 
-    // Start the tray icon in a separate thread
-    thread::spawn(move || {
-        app.wait_for_message();
+    // Create a thread for the window checking loop
+    let window_thread = thread::spawn(move || {
+        loop {
+            if let Some(hwnd) = find_fido_prompt_window() {
+                if is_passkey_window(hwnd) {
+                    if hwnd.0 != last_processed_hwnd.0 {
+                        if !waiting_for_new_window {
+                            println!("Passkey window found!");
+                            select_security_key_option(hwnd);
+                            last_processed_hwnd = hwnd;
+                            waiting_for_new_window = true;
+                        }
+                    } else if waiting_for_new_window && hwnd.0 != last_processed_hwnd.0 {
+                        waiting_for_new_window = false;
+                    }
+                }
+            } else {
+                waiting_for_new_window = false;
+                last_processed_hwnd = HWND(0);
+            }
+            thread::sleep(Duration::from_millis(500));
+        }
     });
 
-    // Main window checking loop
-    loop {
-        if let Some(hwnd) = find_fido_prompt_window() {
-            if is_passkey_window(hwnd) {
-                if hwnd.0 != last_processed_hwnd.0 {
-                    if !waiting_for_new_window {
-                        println!("Passkey window found!");
-                        select_security_key_option(hwnd);
-                        last_processed_hwnd = hwnd;
-                        waiting_for_new_window = true;
-                    }
-                } else if waiting_for_new_window && hwnd.0 != last_processed_hwnd.0 {
-                    waiting_for_new_window = false;
-                }
-            }
-        } else {
-            waiting_for_new_window = false;
-            last_processed_hwnd = HWND(0);
-        }
-        thread::sleep(Duration::from_millis(500));
-    }
+    // Run the tray icon in the main thread
+    app.wait_for_message();
+    
+    // Wait for the window thread to finish (though it never should)
+    let _ = window_thread.join();
 }
 
 fn find_fido_prompt_window() -> Option<HWND> {
