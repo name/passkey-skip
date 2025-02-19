@@ -35,7 +35,7 @@ A simple Windows utility that automatically handles Windows Security prompts by 
 # Create directory and download files
 New-Item -ItemType Directory -Path "C:\Program Files\PasskeySkip" -Force
 Set-Location -Path "C:\Program Files\PasskeySkip"
-Invoke-WebRequest -Uri "https://github.com/name/passkey-skip/releases/download/0.1.0/passkey-skip.exe" -OutFile "passkey-skip.exe"
+Invoke-WebRequest -Uri "https://github.com/name/passkey-skip/releases/download/0.2.0/passkey-skip.exe" -OutFile "passkey-skip.exe"
 ```
 
 ### Auto-start Setup
